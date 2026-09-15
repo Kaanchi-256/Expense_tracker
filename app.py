@@ -25,7 +25,7 @@ def landing():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if session.get("user_id"):
-        return redirect(url_for("landing"))
+        return redirect(url_for("profile"))
 
     if request.method != "POST":
         return render_template("register.html")
@@ -59,7 +59,7 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("user_id"):
-        return redirect(url_for("landing"))
+        return redirect(url_for("profile"))
 
     if request.method != "POST":
         return render_template("login.html")
@@ -79,7 +79,8 @@ def login():
         return render_template("login.html", error=error)
 
     session["user_id"] = user["id"]
-    return redirect(url_for("landing"))
+    session["user_name"] = user["name"]
+    return redirect(url_for("profile"))
 
 
 @app.route("/terms")
@@ -101,6 +102,7 @@ def seed_user():
 @app.route("/logout")
 def logout():
     session.pop("user_id", None)
+    session.pop("user_name", None)
     return redirect(url_for("landing"))
 
 
@@ -110,7 +112,41 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    user = {
+        "name": "Nitish Kumar",
+        "email": "nitish@example.com",
+        "member_since": "March 2024",
+        "initials": "NK",
+    }
+    transactions = [
+        {"date": "2026-09-12", "description": "Grocery run", "category": "Food", "amount": 42.50},
+        {"date": "2026-09-10", "description": "Metro card top-up", "category": "Transport", "amount": 15.00},
+        {"date": "2026-09-08", "description": "Electricity bill", "category": "Bills", "amount": 85.00},
+        {"date": "2026-09-05", "description": "Movie night", "category": "Entertainment", "amount": 25.00},
+        {"date": "2026-09-02", "description": "New shoes", "category": "Shopping", "amount": 60.00},
+    ]
+    categories = [
+        {"name": "Bills", "total": 85.00, "percent": 37},
+        {"name": "Shopping", "total": 60.00, "percent": 26},
+        {"name": "Food", "total": 42.50, "percent": 19},
+        {"name": "Entertainment", "total": 25.00, "percent": 11},
+        {"name": "Transport", "total": 15.00, "percent": 7},
+    ]
+    stats = {
+        "total_spent": sum(t["amount"] for t in transactions),
+        "transaction_count": len(transactions),
+        "top_category": "Bills",
+    }
+    return render_template(
+        "profile.html",
+        user=user,
+        transactions=transactions,
+        categories=categories,
+        stats=stats,
+    )
 
 
 @app.route("/expenses/add")
