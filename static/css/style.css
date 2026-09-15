@@ -19,6 +19,21 @@
     --border: #e4e1da;
     --border-soft: #eeebe4;
 
+    --cat-food: #b5563a;
+    --cat-food-light: #f7e9e4;
+    --cat-transport: #2b6fa8;
+    --cat-transport-light: #e6eef5;
+    --cat-bills: var(--accent-2);
+    --cat-bills-light: var(--accent-2-light);
+    --cat-health: var(--danger);
+    --cat-health-light: var(--danger-light);
+    --cat-entertainment: #7a4fa3;
+    --cat-entertainment-light: #efe7f5;
+    --cat-shopping: var(--accent);
+    --cat-shopping-light: var(--accent-light);
+    --cat-other: var(--ink-muted);
+    --cat-other-light: var(--paper-warm);
+
     --font-display: 'DM Serif Display', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
 
@@ -102,6 +117,9 @@ a { color: inherit; text-decoration: none; }
 
 .nav-links a { color: var(--ink-muted); transition: color 0.2s; }
 .nav-links a:hover { color: var(--ink); }
+
+.nav-user { font-weight: 600; color: var(--ink-soft) !important; }
+.nav-user:hover { color: var(--ink) !important; }
 
 .nav-cta {
     background: var(--ink) !important;
