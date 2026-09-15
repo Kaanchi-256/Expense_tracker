@@ -1,8 +1,12 @@
-from flask import Flask, render_template
+from flask import Flask, abort, redirect, render_template, request, session, url_for
+from werkzeug.security import generate_password_hash
 
-from database.db import get_db, init_db, seed_db
+from database.db import create_user, get_db, get_user_by_email, init_db, seed_db
 
 app = Flask(__name__)
+# Hardcoded for this learning project — a real deployment should load this
+# from an environment variable instead.
+app.secret_key = "spendly-dev-secret-key"
 
 with app.app_context():
     init_db()
@@ -18,9 +22,35 @@ def landing():
     return render_template("landing.html")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    return render_template("register.html")
+    if request.method != "POST":
+        return render_template("register.html")
+
+    if not request.form:
+        abort(400)
+
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+
+    error = None
+    if not name:
+        error = "Full name is required."
+    elif not email or "@" not in email or "." not in email.split("@")[-1]:
+        error = "Please enter a valid email address."
+    elif len(password) < 8:
+        error = "Password must be at least 8 characters."
+    elif get_user_by_email(email) is not None:
+        error = "An account with that email already exists."
+
+    if error:
+        return render_template("register.html", error=error)
+
+    password_hash = generate_password_hash(password)
+    user_id = create_user(name, email, password_hash)
+    session["user_id"] = user_id
+    return redirect(url_for("login"))
 
 
 @app.route("/login")
