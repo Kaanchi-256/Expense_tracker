@@ -38,6 +38,12 @@ def privacy():
     return render_template("privacy.html")
 
 
+@app.route("/seed-user")
+def seed_user():
+    seed_db()
+    return "Demo user seeded — email: demo@spendly.com, password: demo123"
+
+
 # ------------------------------------------------------------------ #
 # Placeholder routes — students will implement these                  #
 # ------------------------------------------------------------------ #
