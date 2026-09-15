@@ -4,16 +4,12 @@ argument-hint: "Step number and feature name e.g. 2 registration"
 allowed-tools: Read, Write, Glob, Bash(git:*)
 ---
 
-You are a senior developer spinning up a new feature for the
-Expense-tracker. Always follow the rules in CLAUDE.md.
+You are a senior developer spinning up a new feature for the Expense-tracker. Always follow the rules in CLAUDE.md.
 
 User input: $ARGUMENTS
 
 ## Step 1 — Check working directory is clean
-Run `git status` and check for uncommitted, unstaged, or
-untracked files. If any exist, stop immediately and tell
-the user to commit or stash changes before proceeding.
-DO NOT CONTINUE until the working directory is clean.
+Run `git status` and check for uncommitted, unstaged, or untracked files. If any exist, stop immediately and tell the user to commit or stash changes before proceeding. DO NOT CONTINUE until the working directory is clean.
 
 ## Step 2 — Parse the arguments
 From $ARGUMENTS extract:
@@ -32,8 +28,7 @@ From $ARGUMENTS extract:
 4. `branch_name` — format: `feature/<feature_slug>`
    - Example: `feature/registration`
 
-If you cannot infer these from $ARGUMENTS, ask the user
-to clarify before proceeding.
+If you cannot infer these from $ARGUMENTS, ask the user to clarify before proceeding.
 
 ## Step 3 — Check branch name is not taken
 Run `git branch` to list existing branches.
@@ -60,8 +55,7 @@ Read these files before writing the spec:
 - `database/db.py` — existing schema and functions
 - All files in `.claude/specs/` — avoid duplicating existing specs
 
-Check `CLAUDE.md` to confirm the requested step is not already
-marked complete. If it is, warn the user and stop.
+Check `CLAUDE.md` to confirm the requested step is not already marked complete. If it is, warn the user and stop.
 
 ## Step 7 — Write the spec
 Generate a spec document with this exact structure:
@@ -70,8 +64,7 @@ Generate a spec document with this exact structure:
 # Spec: <feature_title>
 
 ## Overview
-One paragraph describing what this feature does and why
-it exists at this stage of the expense-tracker roadmap.
+One paragraph describing what this feature does and why it exists at this stage of the expense-tracker roadmap.
 
 ## Depends on
 Which previous steps this feature requires to be complete.
@@ -84,8 +77,7 @@ If no new routes: state "No new routes".
 
 ## Database changes
 Any new tables, columns, or constraints needed.
-Always verify against `database/db.py` before writing this.
-If none: state "No database changes".
+Always verify against `database/db.py` before writing this. If none: state "No database changes".
 
 ## Templates
 - **Create:** list new templates with their path
@@ -126,6 +118,6 @@ Title:     <feature_title>
 
 Then tell the user:
 "Review the spec at `.claude/specs/<step_number>-<feature_slug>.md`
-then enter Plan Mode with Shift+Tab twice to begin implementation."
+then enter Plan Mode with Shift+Tab twice to begin implementation." 
 
 Do not print the full spec in chat unless explicitly asked.

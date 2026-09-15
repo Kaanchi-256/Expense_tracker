@@ -1,5 +1,5 @@
 from flask import Flask, abort, redirect, render_template, request, session, url_for
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from database.db import create_user, get_db, get_user_by_email, init_db, seed_db
 
@@ -24,6 +24,9 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
     if request.method != "POST":
         return render_template("register.html")
 
@@ -53,9 +56,30 @@ def register():
     return redirect(url_for("login"))
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
+    if request.method != "POST":
+        return render_template("login.html")
+
+    if not request.form:
+        abort(400)
+
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+
+    error = "Invalid email or password."
+    user = get_user_by_email(email)
+    if user is not None and check_password_hash(user["password_hash"], password):
+        error = None
+
+    if error:
+        return render_template("login.html", error=error)
+
+    session["user_id"] = user["id"]
+    return redirect(url_for("landing"))
 
 
 @app.route("/terms")
@@ -74,14 +98,15 @@ def seed_user():
     return "Demo user seeded — email: demo@spendly.com, password: demo123"
 
 
+@app.route("/logout")
+def logout():
+    session.pop("user_id", None)
+    return redirect(url_for("landing"))
+
+
 # ------------------------------------------------------------------ #
 # Placeholder routes — students will implement these                  #
 # ------------------------------------------------------------------ #
-
-@app.route("/logout")
-def logout():
-    return "Logout — coming in Step 3"
-
 
 @app.route("/profile")
 def profile():
