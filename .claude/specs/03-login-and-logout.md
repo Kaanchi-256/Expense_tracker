@@ -9,7 +9,7 @@ This step turns the existing `GET /login` page (currently a static template rend
 
 ## Routes
 - `GET /login` — renders the login form — public (already implemented, unchanged)
-- `POST /login` — validates credentials, starts a session, redirects to `/profile` — public
+- `POST /login` — validates credentials, starts a session, redirects to `/` — public
 - `GET /logout` — clears the session, redirects to `/` — logged-in (safe no-op if no session exists)
 
 ## Database changes
@@ -25,7 +25,7 @@ New function needed in `database/db.py` (route logic must not touch SQL directly
   - Keep the existing `{% if error %}` block for invalid-credential messages — no new markup needed
 
 ## Files to change
-- `app.py` — add `methods=["GET", "POST"]` to the `/login` route, implement POST handling (look up user by email, verify password with `check_password_hash`, set session, redirect to `/profile`); implement `/logout` (clear session, redirect to `/`)
+- `app.py` — add `methods=["GET", "POST"]` to the `/login` route, implement POST handling (look up user by email, verify password with `check_password_hash`, set session, redirect to `/`); implement `/logout` (clear session, redirect to `/`)
 - `templates/login.html` — fix hardcoded form action
 
 ## Files to create
@@ -50,7 +50,7 @@ No new dependencies. `werkzeug.security.check_password_hash` is available alongs
 - Do not touch `/register` or `/profile` route logic beyond redirecting into them — `/profile` remains a stub owned by Step 04
 
 ## Definition of done
-- [ ] Submitting the login form with the seeded demo account (`demo@spendly.com` / `demo123`) logs in successfully and redirects to `/profile`
+- [ ] Submitting the login form with the seeded demo account (`demo@spendly.com` / `demo123`) logs in successfully and redirects to `/`
 - [ ] Submitting the login form with a correct email but wrong password re-renders `login.html` with a generic invalid-credentials error and does not create a session
 - [ ] Submitting the login form with an email that doesn't exist re-renders `login.html` with the same generic invalid-credentials error (no user enumeration)
 - [ ] Submitting with a missing field re-renders `login.html` with an error instead of crashing
