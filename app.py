@@ -1,7 +1,19 @@
+from datetime import datetime
+
 from flask import Flask, abort, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from database.db import create_user, get_db, get_user_by_email, init_db, seed_db
+from database.db import (
+    create_user,
+    get_category_breakdown,
+    get_db,
+    get_recent_transactions,
+    get_user_by_email,
+    get_user_by_id,
+    get_user_stats,
+    init_db,
+    seed_db,
+)
 
 app = Flask(__name__)
 # Hardcoded for this learning project — a real deployment should load this
@@ -112,34 +124,36 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    if not session.get("user_id"):
+    user_id = session.get("user_id")
+    if not user_id:
         return redirect(url_for("login"))
 
+    user_row = get_user_by_id(user_id)
+    if user_row is None:
+        session.pop("user_id", None)
+        session.pop("user_name", None)
+        return redirect(url_for("login"))
+
+    name_parts = user_row["name"].split()
+    initials = "".join(part[0].upper() for part in name_parts[:2]) or "?"
+
+    created_at = datetime.strptime(user_row["created_at"], "%Y-%m-%d %H:%M:%S")
+    member_since = created_at.strftime("%B %Y")
+
     user = {
-        "name": "Nitish Kumar",
-        "email": "nitish@example.com",
-        "member_since": "March 2024",
-        "initials": "NK",
+        "name": user_row["name"],
+        "email": user_row["email"],
+        "member_since": member_since,
+        "initials": initials,
     }
-    transactions = [
-        {"date": "2026-09-12", "description": "Grocery run", "category": "Food", "amount": 42.50},
-        {"date": "2026-09-10", "description": "Metro card top-up", "category": "Transport", "amount": 15.00},
-        {"date": "2026-09-08", "description": "Electricity bill", "category": "Bills", "amount": 85.00},
-        {"date": "2026-09-05", "description": "Movie night", "category": "Entertainment", "amount": 25.00},
-        {"date": "2026-09-02", "description": "New shoes", "category": "Shopping", "amount": 60.00},
-    ]
-    categories = [
-        {"name": "Bills", "total": 85.00, "percent": 37},
-        {"name": "Shopping", "total": 60.00, "percent": 26},
-        {"name": "Food", "total": 42.50, "percent": 19},
-        {"name": "Entertainment", "total": 25.00, "percent": 11},
-        {"name": "Transport", "total": 15.00, "percent": 7},
-    ]
-    stats = {
-        "total_spent": sum(t["amount"] for t in transactions),
-        "transaction_count": len(transactions),
-        "top_category": "Bills",
-    }
+
+    stats = get_user_stats(user_id)
+    if stats["top_category"] is None:
+        stats["top_category"] = "—"
+
+    transactions = get_recent_transactions(user_id, limit=10)
+    categories = get_category_breakdown(user_id)
+
     return render_template(
         "profile.html",
         user=user,
