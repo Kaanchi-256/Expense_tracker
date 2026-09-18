@@ -1,0 +1,94 @@
+/* ------------------------------------------------------------------ */
+/* Analytics — coming soon                                             */
+/* ------------------------------------------------------------------ */
+
+.analytics-section {
+    min-height: calc(100vh - 60px - 100px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+}
+
+.analytics-container {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.analytics-icon {
+    width: 88px;
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(26, 71, 42, 0.28);
+    margin-bottom: 1.5rem;
+}
+
+.analytics-icon svg {
+    width: 40px;
+    height: 40px;
+    stroke: var(--paper-card);
+}
+
+.analytics-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.35rem 1.1rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+}
+
+.analytics-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+}
+
+.analytics-subtitle {
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 300px;
+}
+
+.analytics-dots {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 1.5rem;
+}
+
+.analytics-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    animation: analytics-pulse 1.4s ease-in-out infinite;
+}
+
+.analytics-dot:nth-child(2) { animation-delay: 0.2s; }
+.analytics-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes analytics-pulse {
+    0%, 80%, 100% { opacity: 0.3; }
+    40% { opacity: 1; }
+}
+
+.analytics-note {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.03em;
+}

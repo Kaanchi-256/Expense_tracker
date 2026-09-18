@@ -188,6 +188,21 @@ def create_user(name, email, password_hash):
     return user_id
 
 
+def create_expense(user_id, amount, category, expense_date, description):
+    conn = get_db()
+    cursor = conn.execute(
+        """
+        INSERT INTO expenses (user_id, amount, category, date, description)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (user_id, amount, category, expense_date, description),
+    )
+    conn.commit()
+    expense_id = cursor.lastrowid
+    conn.close()
+    return expense_id
+
+
 def get_category_breakdown(user_id, start_date=None, end_date=None):
     conn = get_db()
     clause, date_params = _date_filter_clause(start_date, end_date)
