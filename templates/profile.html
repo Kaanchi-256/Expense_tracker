@@ -34,6 +34,21 @@
             </div>
         </div>
 
+        <div class="profile-filter">
+            <div class="profile-filter-presets">
+                <a class="filter-pill{{ ' filter-pill-active' if active_preset == 'all' else '' }}" href="{{ url_for('profile') }}">All Time</a>
+                {% for key, preset in presets.items() %}
+                <a class="filter-pill{{ ' filter-pill-active' if active_preset == key else '' }}" href="{{ url_for('profile', start_date=preset.start, end_date=preset.end) }}">{{ preset.label }}</a>
+                {% endfor %}
+            </div>
+            <form class="profile-filter-custom" method="get" action="{{ url_for('profile') }}">
+                <input class="form-input" type="date" name="start_date" value="{{ start_date }}" aria-label="Start date">
+                <span class="profile-filter-to">to</span>
+                <input class="form-input" type="date" name="end_date" value="{{ end_date }}" aria-label="End date">
+                <button type="submit" class="filter-pill filter-pill-active">Apply</button>
+            </form>
+        </div>
+
         <div class="profile-columns">
             <div class="profile-block">
                 <h2 class="profile-block-title">Recent transactions</h2>
@@ -54,6 +69,10 @@
                             <td><span class="profile-badge profile-badge-{{ t.category|lower }}">{{ t.category }}</span></td>
                             <td class="profile-amount">₹{{ "%.2f"|format(t.amount) }}</td>
                         </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="profile-empty">No transactions in this range.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -70,6 +89,8 @@
                         </div>
                         <span class="profile-cat-total">₹{{ "%.2f"|format(c.total) }}</span>
                     </div>
+                    {% else %}
+                    <p class="profile-empty">No spending in this range.</p>
                     {% endfor %}
                 </div>
             </div>

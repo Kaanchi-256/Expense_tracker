@@ -1,4 +1,5 @@
-from datetime import datetime
+import calendar
+from datetime import date, datetime
 
 from flask import Flask, abort, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -23,6 +24,67 @@ app.secret_key = "spendly-dev-secret-key"
 with app.app_context():
     init_db()
     seed_db()
+
+
+def _parse_date_arg(value):
+    value = value.strip()
+    if not value:
+        return None
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        return None
+    return value
+
+
+def _shift_months(base_date, months):
+    # Zero-index the month, subtract, then re-derive year/month from the
+    # result so it rolls over correctly across year boundaries; the day is
+    # clamped to the target month's length (e.g. Aug 31 - 6 months -> Feb 28/29).
+    month_index = base_date.month - 1 - months
+    year = base_date.year + month_index // 12
+    month = month_index % 12 + 1
+    day = min(base_date.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
+
+
+def _date_presets():
+    today = date.today()
+    return {
+        "this_month": {
+            "label": "This Month",
+            "start": today.replace(day=1).isoformat(),
+            "end": today.isoformat(),
+        },
+        "last_3_months": {
+            "label": "Last 3 Months",
+            "start": _shift_months(today, 3).isoformat(),
+            "end": today.isoformat(),
+        },
+        "last_6_months": {
+            "label": "Last 6 Months",
+            "start": _shift_months(today, 6).isoformat(),
+            "end": today.isoformat(),
+        },
+    }
+
+
+def _active_preset(start_date, end_date, presets):
+    if not start_date and not end_date:
+        return "all"
+    for key, preset in presets.items():
+        if start_date == preset["start"] and end_date == preset["end"]:
+            return key
+    return None
+
+
+def _resolve_date_range(args):
+    start_date = _parse_date_arg(args.get("start_date", ""))
+    end_date = _parse_date_arg(args.get("end_date", ""))
+    if start_date and end_date and start_date > end_date:
+        start_date = None
+        end_date = None
+    return start_date, end_date
 
 
 # ------------------------------------------------------------------ #
@@ -147,12 +209,21 @@ def profile():
         "initials": initials,
     }
 
-    stats = get_user_stats(user_id)
+    start_date, end_date = _resolve_date_range(request.args)
+
+    presets = _date_presets()
+    active_preset = _active_preset(start_date, end_date, presets)
+
+    stats = get_user_stats(user_id, start_date=start_date, end_date=end_date)
     if stats["top_category"] is None:
         stats["top_category"] = "—"
 
-    transactions = get_recent_transactions(user_id, limit=10)
-    categories = get_category_breakdown(user_id)
+    transactions = get_recent_transactions(
+        user_id, limit=10, start_date=start_date, end_date=end_date
+    )
+    categories = get_category_breakdown(
+        user_id, start_date=start_date, end_date=end_date
+    )
 
     return render_template(
         "profile.html",
@@ -160,6 +231,10 @@ def profile():
         transactions=transactions,
         categories=categories,
         stats=stats,
+        start_date=start_date or "",
+        end_date=end_date or "",
+        presets=presets,
+        active_preset=active_preset,
     )
 
 
