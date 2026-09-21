@@ -231,6 +231,72 @@
 
 .profile-amount { text-align: right; font-weight: 500; color: var(--ink); }
 
+/* Row actions dropdown */
+
+.profile-actions {
+    text-align: right;
+    position: relative;
+    width: 1%;
+    white-space: nowrap;
+}
+
+.actions-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.actions-menu-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--ink-muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.actions-menu-btn:hover,
+.actions-menu-btn[aria-expanded="true"] {
+    background: var(--border-soft);
+    border-color: var(--border);
+    color: var(--ink);
+}
+
+.actions-menu-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    min-width: 9rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 24px var(--shadow-color);
+    padding: 0.35rem;
+    z-index: 20;
+}
+
+.actions-menu.is-open .actions-menu-panel {
+    display: block;
+}
+
+.actions-menu-item {
+    display: block;
+    padding: 0.5rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    text-align: left;
+}
+
+.actions-menu-item:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
 /* Category badges */
 
 .profile-badge {

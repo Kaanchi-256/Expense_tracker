@@ -37,7 +37,7 @@ def get_recent_transactions(user_id, limit=10, start_date=None, end_date=None):
     clause, date_params = _date_filter_clause(start_date, end_date)
     rows = conn.execute(
         """
-        SELECT date, description, category, amount
+        SELECT id, date, description, category, amount
         FROM expenses
         WHERE user_id = ?""" + clause + """
         ORDER BY date DESC, id DESC
@@ -201,6 +201,34 @@ def create_expense(user_id, amount, category, expense_date, description):
     expense_id = cursor.lastrowid
     conn.close()
     return expense_id
+
+
+def get_expense_by_id(expense_id, user_id):
+    conn = get_db()
+    expense = conn.execute(
+        """
+        SELECT id, user_id, amount, category, date, description
+        FROM expenses
+        WHERE id = ? AND user_id = ?
+        """,
+        (expense_id, user_id),
+    ).fetchone()
+    conn.close()
+    return expense
+
+
+def update_expense(expense_id, amount, category, expense_date, description):
+    conn = get_db()
+    conn.execute(
+        """
+        UPDATE expenses
+        SET amount = ?, category = ?, date = ?, description = ?
+        WHERE id = ?
+        """,
+        (amount, category, expense_date, description, expense_id),
+    )
+    conn.commit()
+    conn.close()
 
 
 def get_category_breakdown(user_id, start_date=None, end_date=None):
