@@ -11,12 +11,14 @@ from database.db import (
     create_user,
     get_category_breakdown,
     get_db,
+    get_expense_by_id,
     get_recent_transactions,
     get_user_by_email,
     get_user_by_id,
     get_user_stats,
     init_db,
     seed_db,
+    update_expense,
 )
 
 app = Flask(__name__)
@@ -88,6 +90,30 @@ def _resolve_date_range(args):
         start_date = None
         end_date = None
     return start_date, end_date
+
+
+def _parse_expense_form(form):
+    amount_raw = form.get("amount", "").strip()
+    category = form.get("category", "").strip()
+    expense_date = form.get("date", "").strip()
+    description = form.get("description", "").strip()
+
+    error = None
+    amount = None
+    try:
+        amount = float(amount_raw)
+        if not math.isfinite(amount) or amount <= 0:
+            error = "Amount must be a positive number."
+    except ValueError:
+        error = "Please enter a valid amount."
+
+    if not error and category not in CATEGORIES:
+        error = "Please choose a valid category."
+
+    if not error and not expense_date:
+        expense_date = date.today().isoformat()
+
+    return amount_raw, amount, category, expense_date, description, error
 
 
 # ------------------------------------------------------------------ #
@@ -266,25 +292,9 @@ def add_expense():
     if not request.form:
         abort(400)
 
-    amount_raw = request.form.get("amount", "").strip()
-    category = request.form.get("category", "").strip()
-    expense_date = request.form.get("date", "").strip()
-    description = request.form.get("description", "").strip()
-
-    error = None
-    amount = None
-    try:
-        amount = float(amount_raw)
-        if not math.isfinite(amount) or amount <= 0:
-            error = "Amount must be a positive number."
-    except ValueError:
-        error = "Please enter a valid amount."
-
-    if not error and category not in CATEGORIES:
-        error = "Please choose a valid category."
-
-    if not error and not expense_date:
-        expense_date = date.today().isoformat()
+    amount_raw, amount, category, expense_date, description, error = _parse_expense_form(
+        request.form
+    )
 
     if error:
         return render_template(
@@ -302,9 +312,48 @@ def add_expense():
     return redirect(url_for("profile"))
 
 
-@app.route("/expenses/<int:id>/edit")
-def edit_expense(id):
-    return "Edit expense — coming in Step 8"
+@app.route("/expenses/<int:expense_id>/edit", methods=["GET", "POST"])
+def edit_expense(expense_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    expense = get_expense_by_id(expense_id, user_id)
+    if expense is None:
+        abort(404)
+
+    if request.method != "POST":
+        return render_template(
+            "expenses_edit.html",
+            categories=CATEGORIES,
+            expense_id=expense_id,
+            amount=expense["amount"],
+            category=expense["category"],
+            date=expense["date"],
+            description=expense["description"],
+        )
+
+    if not request.form:
+        abort(400)
+
+    amount_raw, amount, category, expense_date, description, error = _parse_expense_form(
+        request.form
+    )
+
+    if error:
+        return render_template(
+            "expenses_edit.html",
+            categories=CATEGORIES,
+            expense_id=expense_id,
+            error=error,
+            amount=amount_raw,
+            category=category,
+            date=expense_date,
+            description=description,
+        )
+
+    update_expense(expense_id, amount, category, expense_date, description or None)
+    return redirect(url_for("profile"))
 
 
 @app.route("/expenses/<int:id>/delete")
