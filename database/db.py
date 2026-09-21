@@ -231,6 +231,15 @@ def update_expense(expense_id, amount, category, expense_date, description):
     conn.close()
 
 
+def delete_expense(expense_id, user_id):
+    conn = get_db()
+    conn.execute(
+        "DELETE FROM expenses WHERE id = ? AND user_id = ?", (expense_id, user_id)
+    )
+    conn.commit()
+    conn.close()
+
+
 def get_category_breakdown(user_id, start_date=None, end_date=None):
     conn = get_db()
     clause, date_params = _date_filter_clause(start_date, end_date)
