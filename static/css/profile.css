@@ -297,6 +297,11 @@
     color: var(--accent);
 }
 
+.actions-menu-item-danger:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
 /* Category badges */
 
 .profile-badge {

@@ -9,5 +9,6 @@
       "Bash(git diff:*)",
       "Bash(git log:*)"
     ]
-  }
+  },
+  "enabledPlugins": {}
 }
